@@ -127,7 +127,6 @@ $(document).ready(function () {
                 divDettagli.html(str);
             }
             else {
-                let stream
                 divDettagli.empty();
                 delete data._id
                 textarea = $("<textarea>").appendTo(divDettagli).val(JSON.stringify(data, null, 2));
@@ -157,7 +156,7 @@ $(document).ready(function () {
                 alert("Formato JSON non valido")
                 return;
             }
-            let requestAdd = inviaRichiesta(metodo, "/api/" + currentCollection+"/"+id, { stream });
+            let requestAdd = inviaRichiesta(metodo, "/api/" + currentCollection+"/"+id, stream);
             requestAdd.fail(errore);
             request.done((data) => {
                 console.log(data);

@@ -15,40 +15,34 @@ import cors from "cors";
 dotenv.config({ "path": ".env" })
 const HTTP_PORT = process.env.PORT || 1337;
 const HTTPS_PORT = 1338
-const privateKey  = fs.readFileSync("keys/privateKey.pem", "utf8");
+const privateKey = fs.readFileSync("keys/privateKey.pem", "utf8");
 const certificate = fs.readFileSync("keys/certificate.crt", "utf8");
-const credentials = { "key": privateKey, "cert": certificate }; 
+const credentials = { "key": privateKey, "cert": certificate };
 const app = express();
 const DB_NAME: string = "5b";
 const connectionString: any = process.env.connectionString;
 const whitelist = ["https://crudserver-paolobarbero.onrender.com", "https://localhost:1338", "http://localhost:1337", "https://cordovaapp"]
 const corsOption = {
-    origin: function(origin:any, callback:any) {
-    if (!origin) // browser direct call
-    return callback(null, true);
-    if (whitelist.indexOf(origin) === -1) {
-    var msg = `The CORS policy for this site does not
-    allow access from the specified Origin.`
-    return callback(new Error(msg), false);
-    }
-    else
-    return callback(null, true);
+    origin: function (origin: any, callback: any) {
+
+        return callback(null, true);
     },
+
     credentials: true
-   };
-   
+};
+
 let server = http.createServer(app);
 
 
 let paginaErrore: string;//strinag che contiene la pagina di errore
 //avvio del server
-server.listen(HTTP_PORT, ()=> {
+server.listen(HTTP_PORT, () => {
     init()
 });
 
 let httpsServer = https.createServer(credentials, app);
-httpsServer.listen(HTTPS_PORT, function(){
-	console.log("Server in ascolto sulle porte HTTP:" + HTTP_PORT + ", HTTPS:" + HTTPS_PORT);
+httpsServer.listen(HTTPS_PORT, function () {
+    console.log("Server in ascolto sulle porte HTTP:" + HTTP_PORT + ", HTTPS:" + HTTPS_PORT);
 });
 
 function init() {
@@ -141,7 +135,7 @@ app.get("/api/:Collection", (req: any, res: any, next: any) => {
                 response.push({ "_id": item["_id"], "val": item[key] })
             }
 
-            res.send(response);
+            res.send(data);
         }
         req.connessione.close();
     })
@@ -165,7 +159,7 @@ app.get("/api/:nomeCollezione/:id", (req: any, res: any) => {
 
 app.post("/api/:nome_collezione/:id", (req: any, res: any) => {
     let nome_collezione = req.params.nome_collezione;
-    let params = req.body.stream;
+    let params = req.body;
     let collection = req.connessione.db(DB_NAME).collection(nome_collezione)
     collection.insertOne(params, (err: any, data: any) => {
         if (err) {
@@ -181,7 +175,7 @@ app.patch("/api/:nome_collezione/:id", (req: any, res: any) => {
     let nome_collezione = req.params.nome_collezione;
     let id = req.params.id
     let collection = req.connessione.db(DB_NAME).collection(nome_collezione)
-    collection.updateOne({ "_id": new ObjectId(id) }, { $set: req.body.stream }, (err: any, data: any) => {
+    collection.updateOne({ "_id": new ObjectId(id) }, { $set: req.body }, (err: any, data: any) => {
         if (err) {
             res.status(500);
             res.send("Errore esecuzione query");
@@ -195,7 +189,7 @@ app.put("/api/:nome_collezione/:id", (req: any, res: any) => {
     let nome_collezione = req.params.nome_collezione;
     let id = req.params.id
     let collection = req.connessione.db(DB_NAME).collection(nome_collezione)
-    collection.replaceOne({ "_id": new ObjectId(id) }, req.body.stream, (err: any, data: any) => {
+    collection.replaceOne({ "_id": new ObjectId(id) }, req.body, (err: any, data: any) => {
         if (err) {
             res.status(500);
             res.send("Errore esecuzione query");
@@ -220,6 +214,8 @@ app.delete("/api/:nome_collezione/:id", (req: any, res: any) => {
         }
     })
 })
+
+
 
 /************DEFAULT ROOT************/
 
